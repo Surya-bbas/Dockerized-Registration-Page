@@ -1,12 +1,42 @@
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import {AiOutlineGoogle} from 'react-icons/ai'
+import {GoogleAuthProvider,signInWithPopup,onAuthStateChanged, signOut} from 'firebase/auth'
+import { auth } from "../firebaseconfig";
 
 
 function App() {
    const [count, setCount] = useState(0);
+   const [currentUser, setCurrentUser] = useState(null);
+   
+  
+
+   const provider = new GoogleAuthProvider()   
+   function googleLogin(){
+    signInWithPopup(auth, provider)
+   }
+
+
+   useEffect(() => {
+    // Listener for authentication state changes
+    const unsubscribe = onAuthStateChanged(auth,(user) => {
+    if (user) {
+        // User is logged in
+        setCurrentUser(user);
+        console.log("current user:",currentUser);
+    } else {
+        // User is logged out
+        setCurrentUser(null);
+        console.log("current user:",currentUser);
+    }
+    });
+    
+
+}, []);
+
 
    return (
     <section class="flex flex-col md:flex-row h-screen items-center">
+      
 
     <div class="bg-indigo-600 hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
       
@@ -42,7 +72,7 @@ function App() {
   
         <hr class="my-6 border-gray-300 w-full"/>
   
-        <button type="button" class="w-full block bg-white hover:bg-gray-100 focus:bg-gray-100 text-gray-900 font-semibold rounded-lg px-4 py-3 border border-gray-300">
+        <button type="button" class="w-full block bg-white hover:bg-gray-100 focus:bg-gray-100 text-gray-900 font-semibold rounded-lg px-4 py-3 border border-gray-300" onClick={(e)=>googleLogin(e)} >
               <div class="flex items-center justify-center">
               <img src="icons8-google-48.png" alt=""  className="w-8"/>
               <span class="ml-4">
@@ -51,10 +81,16 @@ function App() {
               Google</span>
               </div>
             </button>
+            {currentUser &&
+              <>
+                <p>hello</p>
+                <p>{currentUser?.email}</p>
+              </>
+            }
+            <button className="" type="button" onClick={ ()=>signOut(auth)}> logout</button>    
   
         <p class="mt-8">Need an account? <a href="#" class="text-blue-500 hover:text-blue-700 font-semibold">Create an
                 account</a></p>
-  
   
       </div>
     </div>
